@@ -1,0 +1,86 @@
+RESULTADOS DE ALGORITMO PRIMOS
+------------------------------
+------------------------------
+------ TEST BEGINS -----------
+----------------------------------
+Numero de cores funcionando --> 2
+Longitud de primos --> 2
+('El numero de primos de ', 2, ' digitos es ', 21, '\nTiempo: ', 0.037769)
+Longitud de primos --> 4
+('El numero de primos de ', 4, ' digitos es ', 1061, '\nTiempo: ', 0.036638)
+Longitud de primos --> 6
+('El numero de primos de ', 6, ' digitos es ', 68906, '\nTiempo: ', 0.265547)
+Longitud de primos --> 8
+('El numero de primos de ', 8, ' digitos es ', 5096876, '\nTiempo: ', 30.3377)
+----------------------------------
+Numero de cores funcionando --> 4
+Longitud de primos --> 2
+('El numero de primos de ', 2, ' digitos es ', 21, '\nTiempo: ', 0.04461)
+Longitud de primos --> 4
+('El numero de primos de ', 4, ' digitos es ', 1061, '\nTiempo: ', 0.046615)
+Longitud de primos --> 6
+('El numero de primos de ', 6, ' digitos es ', 68906, '\nTiempo: ', 0.281946)
+Longitud de primos --> 8
+('El numero de primos de ', 8, ' digitos es ', 5096876, '\nTiempo: ', 24.748841)
+----------------------------------
+Numero de cores funcionando --> 6
+Longitud de primos --> 2
+('El numero de primos de ', 2, ' digitos es ', 21, '\nTiempo: ', 0.04232)
+Longitud de primos --> 4
+('El numero de primos de ', 4, ' digitos es ', 1061, '\nTiempo: ', 0.043138)
+Longitud de primos --> 6
+('El numero de primos de ', 6, ' digitos es ', 68906, '\nTiempo: ', 0.365492)
+Longitud de primos --> 8
+('El numero de primos de ', 8, ' digitos es ', 5096876, '\nTiempo: ', 23.995895)
+----------------------------------
+Numero de cores funcionando --> 8
+Longitud de primos --> 2
+('El numero de primos de ', 2, ' digitos es ', 21, '\nTiempo: ', 0.052083)
+Longitud de primos --> 4
+('El numero de primos de ', 4, ' digitos es ', 1061, '\nTiempo: ', 0.055951)
+Longitud de primos --> 6
+('El numero de primos de ', 6, ' digitos es ', 68906, '\nTiempo: ', 0.293518)
+Longitud de primos --> 8
+('El numero de primos de ', 8, ' digitos es ', 5096876, '\nTiempo: ', 16.801028)
+----------------------------------
+Numero de cores funcionando --> 10
+Longitud de primos --> 2
+('El numero de primos de ', 2, ' digitos es ', 21, '\nTiempo: ', 0.056051)
+Longitud de primos --> 4
+('El numero de primos de ', 4, ' digitos es ', 1061, '\nTiempo: ', 0.071381)
+Longitud de primos --> 6
+('El numero de primos de ', 6, ' digitos es ', 68906, '\nTiempo: ', 0.273502)
+Longitud de primos --> 8
+('El numero de primos de ', 8, ' digitos es ', 5096876, '\nTiempo: ', 15.564001)
+----------------------------------
+Numero de cores funcionando --> 12
+Longitud de primos --> 2
+('El numero de primos de ', 2, ' digitos es ', 21, '\nTiempo: ', 0.06276)
+Longitud de primos --> 4
+('El numero de primos de ', 4, ' digitos es ', 1061, '\nTiempo: ', 0.069343)
+Longitud de primos --> 6
+('El numero de primos de ', 6, ' digitos es ', 68906, '\nTiempo: ', 0.236572)
+Longitud de primos --> 8
+('El numero de primos de ', 8, ' digitos es ', 5096876, '\nTiempo: ', 12.300891)
+----------------------------------
+Numero de cores funcionando --> 14
+Longitud de primos --> 2
+('El numero de primos de ', 2, ' digitos es ', 21, '\nTiempo: ', 0.078832)
+Longitud de primos --> 4
+('El numero de primos de ', 4, ' digitos es ', 1061, '\nTiempo: ', 0.082192)
+Longitud de primos --> 6
+('El numero de primos de ', 6, ' digitos es ', 68906, '\nTiempo: ', 0.237635)
+Longitud de primos --> 8
+('El numero de primos de ', 8, ' digitos es ', 5096876, '\nTiempo: ', 11.614286)
+----------------------------------
+Numero de cores funcionando --> 16
+Longitud de primos --> 2
+('El numero de primos de ', 2, ' digitos es ', 21, '\nTiempo: ', 0.088684)
+Longitud de primos --> 4
+('El numero de primos de ', 4, ' digitos es ', 1061, '\nTiempo: ', 0.116397)
+Longitud de primos --> 6
+('El numero de primos de ', 6, ' digitos es ', 68906, '\nTiempo: ', 0.200796)
+Longitud de primos --> 8
+('El numero de primos de ', 8, ' digitos es ', 5096876, '\nTiempo: ', 10.24736)
+--------------------------------
+---------------END--------------

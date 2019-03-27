@@ -1,0 +1,38 @@
+mpi_head:
+  # build: .
+  image: openmpi
+  ports: 
+    - 22
+  links: 
+    - mpi_node
+  volumes:
+    - ./scripts:/home/scripts
+
+mpi_node:
+    # build: .
+    image: openmpi
+    volumes:
+      - ./scripts:/home/scripts
+
+# version: "2"
+
+# services:
+#   mpi_head:
+#     build: .
+#     # image: openmpi
+#     ports: 
+#       - "22"
+#     links: 
+#       - mpi_node
+#     networks:
+#       - net
+
+#   mpi_node:
+#     build: .
+#     # image: openmpi
+#     networks:
+#       - net
+
+# networks:
+#   net:
+#     driver: bridge

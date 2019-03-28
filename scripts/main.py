@@ -71,7 +71,8 @@ def main():
       results.append(comm.recv(source=size, tag=1))
 
     end = time.time()
-    print('result:', sum(results), end - start)
+    # print('result:', sum(results), end - start)
+    print('El número de primos de ', digits, ' digitos es ', sum(results), '\nTiempo: ', end - start)
   else:
     data = comm.recv(source=0, tag=0)
     # print('params', data)

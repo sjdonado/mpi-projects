@@ -1,40 +1,83 @@
 #!/usr/bin/python3
 
 import sys
-import generator
-import verificator
+import numpy
+import time
+from mpi4py import MPI
 
-def verify_numbers(numbers_array):
+
+def is_prime(number):
   """
-    Return the quantity of primes numbers on an array
+    Return true if a number is prime
+  """
+  i = 2
+  prime = True
+  while i <= (number / i):
+    if number % i == 0:
+      prime = False
+      break
+    i += 1 if i == 2 else 2
+  return prime
+
+
+def verify_numbers(min, max):
+  """
+    Retutn the amount of prime numbers in an interval
   """
   primes_cont = 0
-  for number in numbers_array:
-    if verificator.is_prime(number): 
-      primes_cont += 1
+  for number in numpy.arange(min, max, dtype='i'):
+    if is_prime(number): primes_cont += 1
   return primes_cont
 
+
 def main():
-  args = sys.argv[1:]
-  if not args:
-    print('usage: [--cores number] digits')
-    sys.exit(1)
+  comm = MPI.COMM_WORLD
+  rank = comm.Get_rank()
 
-  cores = None
-  if args[0] == '--cores':
-    cores = args[1]
-    del args[0:2]
+  print('My rank is: ',rank, )
 
-  if len(args) == 0:
-    print('error: must specify the number digits')
-    sys.exit(1)
+  if rank == 0:
+    # 2 4 6 8 10 12 14 16
+    size = comm.Get_size() - 1
+    # print('size', size)
 
-  digits = args[0]
+    args = sys.argv[1:]
+    if len(args) == 0:
+      print('error: must specify the number digits')
+      sys.exit(1)
+    
+    start = time.time()
+    
+    # 2 4 6 8
+    digits = int(args[0])
+    range_limit = (10**digits -  10**(digits - 1)) / size
+    # print('range_limit', range_limit)
+    results = []
 
-  numbers_array = generator.numbers(int(digits))
-  print(verify_numbers(numbers_array))
-  if cores: 
-    print(cores)
+    if size > 1:
+      # First range
+      comm.send((10**(digits - 1) + 1, range_limit), dest=1, tag=0)
+      results.append(comm.recv(source=1, tag=1))
+
+      # Last range
+      comm.send((range_limit*(size-1) + 1, 10**digits - 1), dest=size, tag=0)
+      results.append(comm.recv(source=size, tag=1))
+
+      for i in reversed(range(2,size)):
+        comm.send((range_limit*(i-1) + 1, range_limit*i), dest=i, tag=0)
+        results.append(comm.recv(source=i, tag=1))
+    else:
+      comm.send((10**(digits - 1) + 1, 10**digits - 1), dest=size, tag=0)
+      results.append(comm.recv(source=size, tag=1))
+
+    end = time.time()
+    print('result:', sum(results), end - start)
+  else:
+    data = comm.recv(source=0, tag=0)
+    # print('params', data)
+    primes = verify_numbers(data[0], data[1])
+    comm.send(primes, dest=0, tag=1)
+
 
 if __name__ == '__main__':
   main()

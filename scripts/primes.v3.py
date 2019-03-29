@@ -37,18 +37,11 @@ def main():
 
   min = 10**(digits-1)
   max = 10**digits
-  interval_size = (max - min) / size
-  max_interval = (rank +  1) * interval_size + min
-  if rank == size: max_interval = max
 
-  print 'rank', rank, 'interval_size', interval_size
-  print 'min', rank*interval_size + min, 'max', max_interval
-  # print 'numbers', rank, numpy.arange(rank*interval_size + min, max_interval, dtype='i')
+  for num in xrange(rank + min, 10**digits, size):
+    if is_prime(num): primes_cont += 1
 
-  for number in numpy.arange(rank*interval_size + min, max_interval, dtype='i'):
-    if is_prime(number): primes_cont += 1
-
-  # print 'primes_cont', primes_cont
+  print 'primes_cont', primes_cont
   primes = numpy.array(primes_cont, 'i')
   result = numpy.array(0, 'i')
 

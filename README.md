@@ -16,5 +16,9 @@
 ## Run
 ```
   mpiexec -hostfile hosts -n 3 python main.py $DIGITS
+  ./test_script.sh main.py > Resultados_GX.txt
 ```
-
+## Compile
+```
+  mpicc primes.v2.c -o primes -lm
+```

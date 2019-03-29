@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 import sys
 import numpy
@@ -34,7 +34,7 @@ def main():
   comm = MPI.COMM_WORLD
   rank = comm.Get_rank()
 
-  print('My rank is: ',rank, )
+  print 'My rank is: ',rank
 
   if rank == 0:
     # 2 4 6 8 10 12 14 16
@@ -43,7 +43,7 @@ def main():
 
     args = sys.argv[1:]
     if len(args) == 0:
-      print('error: must specify the number digits')
+      print 'error: must specify the number digits'
       sys.exit(1)
     
     start = time.time()
@@ -72,7 +72,7 @@ def main():
 
     end = time.time()
     # print('result:', sum(results), end - start)
-    print('El número de primos de ', digits, ' digitos es ', sum(results), '\nTiempo: ', end - start)
+    print'El numero de primos de ', digits, ' digitos es ', sum(results), 'Tiempo: ', end - start
   else:
     data = comm.recv(source=0, tag=0)
     # print('params', data)

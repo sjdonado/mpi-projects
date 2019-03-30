@@ -35,13 +35,15 @@ def main():
 
   min = 10**(digits - 1)
   max = 10**digits
+  unread_indexes = (max - min) % size
   container_range = range(0, size)
-
+  # print 'limit', limit, 'interval_limit', interval_limit
+  
   for num in xrange(rank * size + min, max, size * size):
-    if num + size - 1 < max:
-      # print 'rank', rank, 'num', num, 'end', num + size
-      for container in container_range:
-        if is_prime(num + container): primes_cont += 1
+    if max - unread_indexes == num: container_range = range(0, unread_indexes)
+    # print 'rank', rank, 'num', num, 'max - size + 1 - unread_indexes', max - unread_indexes, 'container_range', container_range
+    for container in container_range:
+      if is_prime(num + container): primes_cont += 1
 
   # print 'primes_cont', primes_cont
   primes = numpy.array(primes_cont, 'i')
@@ -51,7 +53,7 @@ def main():
 
   if rank == root_process:
     end_time = time.time()
-    print'El numero de primos de', digits, 'digitos es ', result, 'Tiempo: ', end_time - start_time
+    print'El numero de primos de', digits, 'digitos es', result, 'Tiempo:', end_time - start_time
   # comm.Disconnect()
 
 main()

@@ -6,9 +6,7 @@ import time
 from mpi4py import MPI
 
 def is_prime(number):
-  """
-    Return true if a number is prime
-  """
+  # Return true if a number is prime
   i = 2
   prime = True
   while i <= (number / i):
@@ -35,13 +33,17 @@ def main():
   digits = numpy.array(digits_input, 'i')
   comm.Bcast([digits, MPI.INT], root=root_process)
 
-  min = 10**(digits-1)
+  min = 10**(digits - 1)
   max = 10**digits
+  container_range = range(0, size)
 
-  for num in xrange(rank + min, 10**digits, size):
-    if is_prime(num): primes_cont += 1
+  for num in xrange(rank * size + min, max, size * size):
+    if num + size - 1 < max:
+      # print 'rank', rank, 'num', num, 'end', num + size
+      for container in container_range:
+        if is_prime(num + container): primes_cont += 1
 
-  print 'primes_cont', primes_cont
+  # print 'primes_cont', primes_cont
   primes = numpy.array(primes_cont, 'i')
   result = numpy.array(0, 'i')
 
@@ -49,7 +51,6 @@ def main():
 
   if rank == root_process:
     end_time = time.time()
-    # print 'results', result, 'Time', end_time - start_time
     print'El numero de primos de', digits, 'digitos es ', result, 'Tiempo: ', end_time - start_time
   # comm.Disconnect()
 

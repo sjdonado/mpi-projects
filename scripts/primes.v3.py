@@ -37,7 +37,7 @@ def main():
   max = 10**digits
   unread_indexes = (max - min) % size
   container_range = range(0, size)
-  # print 'limit', limit, 'interval_limit', interval_limit
+  print 'min', min, 'max', max, 'digits', digits, 'container_range', container_range, 'unread_indexes', unread_indexes
   
   for num in xrange(rank * size + min, max, size * size):
     if max - unread_indexes == num: container_range = range(0, unread_indexes)

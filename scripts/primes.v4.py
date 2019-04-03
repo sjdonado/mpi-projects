@@ -2,91 +2,70 @@
 
 import sys
 import numpy
-import time
-import math
 from mpi4py import MPI
-
-# def sieveOfAtkin(limit):
-#   P = [2,3]
-#   sieve=[False]*(limit+1)
-#   for x in range(1,int(math.sqrt(limit))+1):
-#     for y in range(1,int(math.sqrt(limit))+1):
-#       n = 4*x**2 + y**2
-#       if n<=limit and (n%12==1 or n%12==5) : sieve[n] = not sieve[n]
-#       n = 3*x**2+y**2
-#       if n<= limit and n%12==7 : sieve[n] = not sieve[n]
-#       n = 3*x**2 - y**2
-#       if x>y and n<=limit and n%12==11 : sieve[n] = not sieve[n]
-#   for x in range(5,int(math.sqrt(limit))):
-#     if sieve[x]:
-#       for y in range(x**2,limit+1,x**2):
-#         sieve[y] = False
-#   for p in range(5,limit):
-#     if sieve[p] : P.append(p)
-#   return P
-
-# print sieveOfAtkin(100)
 
 def main():
   root_process = 0
   digits = 0
-  primes_cont = 0
-  result = 0
-  
+  non_primes_cont = 0
+  num = 0
+  max = 0
+
   comm = MPI.COMM_WORLD
   rank = comm.Get_rank()
   size = comm.Get_size()
 
-  start_time = time.time()
+  start_time = MPI.Wtime()
+
+  rank_range = range(0, size)
+  rank_range.remove(rank)
 
   if rank == root_process:
     digits = int(sys.argv[1:][0])
+    min = 10**(digits - 1)
+    max = 10**digits
+    free_processes = rank_range[:]
 
-  digits = comm.bcast(digits, root=root_process)
+    comm.send(min, dest=root_process, tag=0)
 
-  min = 10**(digits - 1)
-  max = 10**digits
-  unread_indexes = (max - min) % size
-  container_range = range(0, size)
-  interval_size = (max - min) / size
-  limit = (rank +  1) * interval_size + min
-  # print 'limit', limit, 'interval_limit', interval_limit
+    for node_rank in range(0, size): 
+      comm.send(max, dest=node_rank, tag=1)
+      comm.send(free_processes, dest=node_rank, tag=2)
 
-  P = [2,3]
-  sieve=[False]*(limit+1)
-  for x in range(min,int(math.sqrt(limit))+1):
-    for y in range(min,int(math.sqrt(limit))+1):
-      n = 4*x**2 + y**2
-      if n<=limit and (n%12==1 or n%12==5) : sieve[n] = not sieve[n]
-      n = 3*x**2+y**2
-      if n<= limit and n%12==7 : sieve[n] = not sieve[n]
-      n = 3*x**2 - y**2
-      if x>y and n<=limit and n%12==11 : sieve[n] = not sieve[n]
-      sieve = comm.bcast(sieve, root=rank)
-  print 'rank', rank, sieve
-  for x in range(5,int(math.sqrt(limit))):
-    if sieve[x]:
-      for y in range(x**2,limit+1,x**2):
-        sieve[y] = False
-  for p in range(5,limit):
-    if sieve[p] : 
-      P.append(p)
-      primes_cont += 1
-  
-  # for num in xrange(rank * size + min, max, size * size):
-  #   if max - unread_indexes == num: container_range = range(0, unread_indexes)
-  #   # print 'rank', rank, 'num', num, 'max - size + 1 - unread_indexes', max - unread_indexes, 'container_range', container_range
-  #   for container in container_range:
-  #     if is_prime(num + container): primes_cont += 1
+  else:
+    req = comm.irecv(source=root_process, tag=1)
+    max = req.wait()
 
-  primes = numpy.array(primes_cont, 'i')
-  result = numpy.array(0, 'i')
+  while True:
+    num = comm.recv(source=MPI.ANY_SOURCE, tag=0)
+    free_processes = comm.recv(source=MPI.ANY_SOURCE, tag=2)
 
-  comm.Reduce([primes, MPI.INT], [result, MPI.INT], op=MPI.SUM, root=root_process)
+    if num >= maxor num == -1 or free_processes == -1: break
+
+    comm.send(num + 1, dest=free_processes[0], tag=0)
+    del free_processes[0]
+
+    # print 'rank', rank, 'num', num
+    i = 2
+    while i <= num / i:
+      if num % i == 0:
+        non_primes_cont += 1
+        break
+      i += 1 if i == 2 else 2
+    for node_rank in rank_range: 
+      free_processes.append(rank)
+      comm.send(free_processes, dest=node_rank, tag=2)
+
+  # print 'FINISHED ---->', 'rank', rank, 'non_primes_cont', non_primes_cont
+  if num != -1:
+    for node_rank in rank_range: 
+      comm.send(-1, dest=node_rank, tag=0)
+      comm.send(-1, dest=node_rank, tag=2)
+
+  result = comm.reduce(sendobj=non_primes_cont, root=root_process, op=MPI.SUM)
 
   if rank == root_process:
-    end_time = time.time()
-    print'El numero de primos de', digits, 'digitos es', result, 'Tiempo:', end_time - start_time
+    print 'El numero de primos de', digits, 'digitos es', (max - min) - result, 'Tiempo:', MPI.Wtime() - start_time
   # comm.Disconnect()
 
 main()

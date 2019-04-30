@@ -1,6 +1,7 @@
 mpi_head:
   # build: .
   image: openmpi
+  container_name: cluser_head
   ports: 
     - 22
   links: 

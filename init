@@ -1,0 +1,21 @@
+#!/bin/bash
+echo '*** Created by sjdonado ***'
+
+docker-compose down
+
+if [[ "$(docker images -q openmpi 2> /dev/null)" == "" ]]; then
+  echo 'Building openmpi image...' 
+  docker build -t openmpi .
+fi
+
+echo 'Enter number of nodes:'
+read NODES_NUMBER
+
+echo 'Creating head and nodes containers...'
+docker-compose scale mpi_node=$NODES_NUMBER mpi_head=1
+
+DOCKER_HEAD_PORT="$(docker port cluser_head 2> /dev/null)"
+
+echo $DOCKER_HEAD_PORT
+
+ssh -i ssh/id_rsa -p ${DOCKER_HEAD_PORT##*:} mpirun@localhost

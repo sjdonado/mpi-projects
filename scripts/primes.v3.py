@@ -1,8 +1,6 @@
 #!/usr/bin/python
 
 import sys
-import numpy
-import time
 from mpi4py import MPI
 
 def is_prime(number):
@@ -25,13 +23,12 @@ def main():
   rank = comm.Get_rank()
   size = comm.Get_size()
 
-  start_time = time.time()
+  start_time = MPI.Wtime()
 
   if rank == root_process:
-    digits_input = int(sys.argv[1:][0])
+    digits = int(sys.argv[1:][0])
 
-  digits = numpy.array(digits_input, 'i')
-  comm.Bcast([digits, MPI.INT], root=root_process)
+  digits = comm.bcast(digits, root=root_process)
 
   min = 10**(digits - 1)
   max = 10**digits
@@ -39,21 +36,17 @@ def main():
   container_range = range(0, size)
   print 'min', min, 'max', max, 'digits', digits, 'container_range', container_range, 'unread_indexes', unread_indexes
   
-  for num in xrange(rank * size + min, max, size * size):
+  for num in range(rank * size + min, max, size * size):
     if max - unread_indexes == num: container_range = range(0, unread_indexes)
     # print 'rank', rank, 'num', num, 'max - size + 1 - unread_indexes', max - unread_indexes, 'container_range', container_range
     for container in container_range:
       if is_prime(num + container): primes_cont += 1
 
-  # print 'primes_cont', primes_cont
-  primes = numpy.array(primes_cont, 'i')
-  result = numpy.array(0, 'i')
-
-  comm.Reduce([primes, MPI.INT], [result, MPI.INT], op=MPI.SUM, root=root_process)
+  result = comm.reduce(sendobj=primes_cont, root=root_process, op=MPI.SUM)
 
   if rank == root_process:
     end_time = time.time()
-    print'El numero de primos de', digits, 'digitos es', result, 'Tiempo:', end_time - start_time
+    print 'El numero de primos de', digits, 'digitos es', result, 'Tiempo:', MPI.Wtime() - start_time
   # comm.Disconnect()
 
 main()

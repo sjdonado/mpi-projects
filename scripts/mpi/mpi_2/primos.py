@@ -1,16 +1,7 @@
 #!/usr/bin/python
 
 import sys
-import json
 from mpi4py import MPI
-
-def get_number(number, first_one_thousand_primes):
-  for prime in first_one_thousand_primes:
-    if number % prime == 0:
-      number += 1
-    else:
-      break
-  return number
 
 def is_prime(number):
   # Return true if a number is prime
@@ -25,11 +16,11 @@ def is_prime(number):
 
 def main():
   root_process = 0
+
   primes_cont = 0
   nodes_count = 0
   first_iteration = True
   digits = []
-  data = []
 
   comm = MPI.COMM_WORLD
   rank = comm.Get_rank()
@@ -37,20 +28,17 @@ def main():
   if rank == root_process:
     start_time = MPI.Wtime()
     size = comm.Get_size()
+    
+    nodes_statistics = {}
 
-    with open('primes.json') as json_file:  
-      first_one_thousand_primes = json.load(json_file)
-
-    n = int(sys.argv[1:][0])
-    min = 10**(n - 1)
-    max = 10**n
-    number = min + 1
+    max = int(sys.argv[1:][0])
+    number = 1
   
   while True:  
     if rank == root_process:
       if first_iteration:
         for node_rank in range(1, size):
-          number = get_number(number, first_one_thousand_primes)
+          nodes_statistics[str(node_rank)] = 0
           comm.send(number, dest=node_rank)
           number += 1
         first_iteration = False
@@ -58,8 +46,8 @@ def main():
       (node_rank, node_data) = comm.recv(source=MPI.ANY_SOURCE)
       # print('node_rank', node_rank, 'node_data', node_data)
       primes_cont += int(node_data)
+      nodes_statistics[str(node_rank)] += 1
 
-      number = get_number(number, first_one_thousand_primes)
       if number <= max:
         comm.send(number, dest=node_rank)
         number += 1
@@ -70,12 +58,16 @@ def main():
       if nodes_count == size - 1: break
     else:
       number = comm.recv(source=root_process)
-      print('number', number)
+      # print('number', number)
       if number == -1: break
       comm.send((rank, is_prime(number)), dest=root_process)
 
   if rank == root_process:
-    print 'El numero de primos de', n, 'digitos es', primes_cont, 'Tiempo:', MPI.Wtime() - start_time
+    print 'El numero de primos es:', primes_cont
+    print 'Tiempo de ejecucion:', MPI.Wtime() - start_time
+    print 'Numero de validaciones por proceso:'
+    for key in sorted(nodes_statistics.keys()):
+      print 'Proceso:', key, 'Total:', nodes_statistics[key]
 
 if __name__ == '__main__':
   main()

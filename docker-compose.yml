@@ -1,39 +1,43 @@
-mpi_head:
-  # build: .
-  image: openmpi
-  container_name: cluser_head
-  ports: 
-    - 22
-  links: 
-    - mpi_node
-  volumes:
-    - ./scripts:/home/scripts
+version: '2'
 
-mpi_node:
+services:
+  mpi_head:
+    # build: .
+    image: openmpi
+    container_name: cluser_head
+    ports: 
+      - 22
+    links: 
+      - mpi_node
+    volumes:
+      - ./scripts:/home/mpirun/scripts
+    networks:
+      - net
+  mpi_node:
     # build: .
     image: openmpi
     volumes:
-      - ./scripts:/home/scripts
+      - ./scripts:/home/mpirun/scripts
+    networks:
+      - net
 
-# version: "2"
+networks:
+  net:
+    driver: bridge
 
-# services:
-#   mpi_head:
-#     build: .
-#     # image: openmpi
-#     ports: 
-#       - "22"
-#     links: 
-#       - mpi_node
-#     networks:
-#       - net
+# mpi_head:
+#   # build: .
+#   image: openmpi
+#   container_name: cluser_head
+#   ports: 
+#     - 22
+#   links: 
+#     - mpi_node
+#   volumes:
+#     - ./scripts:/home/mpirun/scripts
 
-#   mpi_node:
-#     build: .
-#     # image: openmpi
-#     networks:
-#       - net
-
-# networks:
-#   net:
-#     driver: bridge
+# mpi_node:
+#   # build: .
+#   image: openmpi
+#   volumes:
+#     - ./scripts:/home/mpirun/scripts

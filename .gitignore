@@ -1,4 +1,3 @@
-docker.openmpi
 __pycache__
 .vscode
 .DS_store

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [[ -n "$1" ]]; then
+  echo '===== Created by https://github.com/sjdonado ====='
+  docker-compose down
+
+  if [[ "$(docker images -q openmpi 2> /dev/null)" == "" ]]; then
+    echo 'Building openmpi image...' 
+    docker build -t openmpi .
+  fi
+
+  echo "Creating head and $1 nodes containers..."
+  # docker-compose scale mpi_node=$1 mpi_head=1
+  docker-compose up -d --scale mpi_node=$1
+
+  DOCKER_HEAD_PORT="$(docker port cluser_head 2> /dev/null)"
+
+  ssh -o StrictHostKeyChecking=no -i ./ssh/id_rsa -p ${DOCKER_HEAD_PORT##*:} mpirun@localhost
+else
+  echo Error! Number of nodes not supplied
+fi

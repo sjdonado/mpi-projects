@@ -1,0 +1,198 @@
+2019-05-06 15:48:38
+========================================================
+RESULTADOS DEL ALGORITMO primos_secuencial.py K= 100000
+========================================================
+El numero de primos es: 9591
+Tiempo de ejecucion: 23.7300989628
+========================================================
+RESULTADOS DEL ALGORITMO primos.py K= 100000
+========================================================
+n= 2
+El numero de primos es: 9591
+Tiempo de ejecucion: 24.5690529346
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 99999
+========================================================
+n= 3
+El numero de primos es: 9591
+Tiempo de ejecucion: 12.6775319576
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 50196
+Proceso: 2 Total: 49803
+========================================================
+n= 4
+El numero de primos es: 9591
+Tiempo de ejecucion: 10.1380000114
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 33283
+Proceso: 2 Total: 33213
+Proceso: 3 Total: 33503
+========================================================
+n= 5
+El numero de primos es: 9591
+Tiempo de ejecucion: 10.3724629879
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 23074
+Proceso: 2 Total: 24433
+Proceso: 3 Total: 25152
+Proceso: 4 Total: 27340
+========================================================
+n= 6
+El numero de primos es: 9591
+Tiempo de ejecucion: 10.5556001663
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 19851
+Proceso: 2 Total: 20298
+Proceso: 3 Total: 19412
+Proceso: 4 Total: 20183
+Proceso: 5 Total: 20255
+========================================================
+n= 7
+El numero de primos es: 9591
+Tiempo de ejecucion: 10.7974200249
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 16957
+Proceso: 2 Total: 15080
+Proceso: 3 Total: 17803
+Proceso: 4 Total: 16438
+Proceso: 5 Total: 15880
+Proceso: 6 Total: 17841
+========================================================
+n= 8
+El numero de primos es: 9591
+Tiempo de ejecucion: 10.5630300045
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 14116
+Proceso: 2 Total: 12994
+Proceso: 3 Total: 14564
+Proceso: 4 Total: 11986
+Proceso: 5 Total: 12887
+Proceso: 6 Total: 19601
+Proceso: 7 Total: 13851
+========================================================
+n= 9
+El numero de primos es: 9591
+Tiempo de ejecucion: 10.3279540539
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 12223
+Proceso: 2 Total: 11889
+Proceso: 3 Total: 11853
+Proceso: 4 Total: 12785
+Proceso: 5 Total: 13392
+Proceso: 6 Total: 12395
+Proceso: 7 Total: 12169
+Proceso: 8 Total: 13293
+========================================================
+n= 10
+El numero de primos es: 9591
+Tiempo de ejecucion: 10.2207131386
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 11280
+Proceso: 2 Total: 11605
+Proceso: 3 Total: 11178
+Proceso: 4 Total: 9962
+Proceso: 5 Total: 10906
+Proceso: 6 Total: 10627
+Proceso: 7 Total: 11238
+Proceso: 8 Total: 12591
+Proceso: 9 Total: 10612
+========================================================
+n= 11
+El numero de primos es: 9591
+Tiempo de ejecucion: 10.2694818974
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 10630
+Proceso: 2 Total: 9687
+Proceso: 3 Total: 9656
+Proceso: 4 Total: 9359
+Proceso: 5 Total: 9743
+Proceso: 6 Total: 9315
+Proceso: 7 Total: 13422
+Proceso: 8 Total: 9416
+Proceso: 9 Total: 9535
+Proceso: 10 Total: 9236
+========================================================
+n= 12
+El numero de primos es: 9591
+Tiempo de ejecucion: 9.84996700287
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 8330
+Proceso: 2 Total: 8587
+Proceso: 3 Total: 11016
+Proceso: 4 Total: 8780
+Proceso: 5 Total: 8671
+Proceso: 6 Total: 9993
+Proceso: 7 Total: 8513
+Proceso: 8 Total: 8409
+Proceso: 9 Total: 8465
+Proceso: 10 Total: 10874
+Proceso: 11 Total: 8361
+========================================================
+n= 13
+El numero de primos es: 9591
+Tiempo de ejecucion: 9.70862483978
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 8537
+Proceso: 2 Total: 8204
+Proceso: 3 Total: 8594
+Proceso: 4 Total: 9654
+Proceso: 5 Total: 8393
+Proceso: 6 Total: 8086
+Proceso: 7 Total: 7801
+Proceso: 8 Total: 8225
+Proceso: 9 Total: 8094
+Proceso: 10 Total: 8384
+Proceso: 11 Total: 8063
+Proceso: 12 Total: 7964
+========================================================
+n= 14
+El numero de primos es: 9591
+Tiempo de ejecucion: 9.80917406082
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 7496
+Proceso: 2 Total: 8234
+Proceso: 3 Total: 7420
+Proceso: 4 Total: 8770
+Proceso: 5 Total: 7516
+Proceso: 6 Total: 7745
+Proceso: 7 Total: 7881
+Proceso: 8 Total: 7442
+Proceso: 9 Total: 7417
+Proceso: 10 Total: 7676
+Proceso: 11 Total: 7288
+Proceso: 12 Total: 7895
+Proceso: 13 Total: 7219
+========================================================
+n= 15
+El numero de primos es: 9591
+Tiempo de ejecucion: 9.03809285164
+Numero de validaciones por proceso:
+Proceso: 0 Total: 0
+Proceso: 1 Total: 6681
+Proceso: 2 Total: 7121
+Proceso: 3 Total: 8498
+Proceso: 4 Total: 6960
+Proceso: 5 Total: 6691
+Proceso: 6 Total: 7085
+Proceso: 7 Total: 7955
+Proceso: 8 Total: 7149
+Proceso: 9 Total: 6848
+Proceso: 10 Total: 6691
+Proceso: 11 Total: 6872
+Proceso: 12 Total: 6687
+Proceso: 13 Total: 6986
+Proceso: 14 Total: 7775
+========================================================

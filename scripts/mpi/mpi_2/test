@@ -1,0 +1,29 @@
+if [[ -n "$1" ]]; then
+  echo 'Processing...'
+  date=`date '+%Y-%m-%d %H:%M:%S'`
+  title="RESULTADOS DEL ALGORITMO primos_secuencial.py K= $1  "
+  margin=$(seq -s= ${#title}|tr -d '[:digit:]')
+
+  echo $date > results.txt
+  echo $margin >> results.txt
+  echo $title >> results.txt
+  echo $margin >> results.txt
+
+  python primos_secuencial.py $1 >> results.txt
+  echo $margin >> results.txt
+
+  title="RESULTADOS DEL ALGORITMO primos.py K= $1  "
+  echo $title >> results.txt
+  echo $margin >> results.txt
+
+  for cores in {2..15}
+  do
+    echo "n= $cores"
+    echo 'n=' $cores >> results.txt
+    mpiexec -n $cores python primos.py $1 >> results.txt
+    # mpiexec -n $cores --hostfile hosts python primos.py $1 >> results.txt
+    echo $margin >> results.txt
+  done
+else
+  echo Error! k not supplied
+fi

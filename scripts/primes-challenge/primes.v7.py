@@ -51,18 +51,21 @@ def main():
   arr = np.ndarray(buffer=buf, dtype='i', shape=(1,1))
 
   if rank == root_process:
-    win.Fence()
-    arr[0,0] = [min]
+    # win.Fence()
+    arr[0,0] = min
+    # win.Fence()
 
   world_comm.barrier()
+  
+  # time.sleep(rank/10)
 
   while True:
-    win.Fence()
+    win.Lock(MPI.LOCK_EXCLUSIVE, 1)
     number = arr[0,0]
     arr[0,0] += 1
-    win.Fence()
+    win.Unlock(1)
     if number >= max: break
-    print('RANK:', rank, 'NUMBER:', number)
+    # print('RANK:', rank, 'NUMBER:', number)
     if is_prime(number): primes_cont += 1
 
   result = world_comm.reduce(sendobj=primes_cont, root=root_process, op=MPI.SUM)

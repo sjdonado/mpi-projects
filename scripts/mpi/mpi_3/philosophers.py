@@ -1,64 +1,127 @@
 #!/usr/bin/python
 
 import sys
+import time
+import random as rand
 import numpy as np
 from mpi4py import MPI
 
 def main():
   root_process = 0
-  size = 0
-  start = False
+  k = 0
+  attr_size = 5
 
   world_comm = MPI.COMM_WORLD
+  size = world_comm.Get_size()
   disp_unit = MPI.INT.Get_size()
 
   node_comm = world_comm.Split_type(MPI.COMM_TYPE_SHARED)
-  nodes_size = node_comm.size - 1
 
   if node_comm.rank == root_process:
     start_time = MPI.Wtime()
-    (friendly, ambitious) = (0, 0)
-    size = nodes_size * disp_unit
-    
-    # Generate randomly
-    friendly = 1
-    ambitious = 1
+    memory_size = size * disp_unit**attr_size
+  else:
+    memory_size = 0
   
-  win = MPI.Win.Allocate_shared(size, disp_unit, comm=node_comm)
+  win = MPI.Win.Allocate_shared(memory_size, disp_unit, comm=node_comm)
   buf, itemsize = win.Shared_query(0)
 
-  arr = np.ndarray(buffer=np.array(buf, dtype='B', copy=False), dtype='i', shape=(nodes_size,))
+  buf = np.array(buf, dtype='B', copy=False)
+  arr = np.ndarray(buffer=buf, dtype='i', shape=(size, attr_size))
 
   if node_comm.rank == root_process:
-    # 0 1 2 4
+    if len(sys.argv[1:]) == 1:
+      k = int(sys.argv[1:][0])
+    else:
+      print('Error! k not supplied')
 
-    # Amigable: Si no tiene tenedor --> 0 - 000
-    # Amigable: Si tiene el tenedor de la derecha --> 2 - 010 
-    # Amigable: Si tiene el tenedor de la izquierda --> 4 - 100
+    if node_comm.size > 2:
+      for node in range(1, node_comm.size):
+        right_node = node + 1
+        left_fork = 0
+        right_fork = 0
+        if node == node_comm.size - 1: right_node = 1
+        if node == 0:
+          left_fork = rand.randint(0, 1)
+          right_fork = rand.randint(0, 1)
+
+        # If my left partner doesn't have the fork I can get it
+        if node - 1 > 0 and not arr[node - 1][3]:
+          arr[node-1][3] = rand.randint(0, 1)
+        # If my right partner doesn't have the fork I can get it
+        if len(arr) > right_node and len(arr[right_node]) > 0 and not arr[right_node][2]:
+          arr[right_node][2] = rand.randint(0, 1)
+
+        # [kind, right_node, left_fork, right_fork, finished]
+        # kind -> 0: Friendly, 1: Ambitious
+        arr[node] = np.array([0, right_node, left_fork, right_fork, 0], dtype='i')
     
-    # Ambicioso: Si no tiene tenedor --> 1 - 001
-    # Ambicioso: Si tiene el tenedor de la derecha --> 3 - 011
-    # Ambicioso: Si tiene el tenedor de la izquierda --> 5 - 101
-    arr[:nodes_size] = np.array([1, 4], dtype='i')
+      ambitious = np.random.choice(node_comm.size, 2)
+      # print(arr)
+      arr[ambitious[0]][0] = 1
+      arr[ambitious[1]][0] = 1
 
-  while True:
-    if node_comm.rank == root_process:
-      for index in range(0, nodes_size):
+  k = world_comm.bcast(k, root=root_process)
 
-        props = [int(x) for x in bin(arr[index])[2:]]
-        while len(props) < 3: props.insert(0, 0)
+  if node_comm.rank == root_process:
+    while all(not node[4] for node in arr):
+      time.sleep(1)
+      print(arr)
+  else:
+    for task in range(0, k):
+      print('NODE', node_comm.rank, 'TASK', task, '-->', 'arr', arr[node_comm.rank], 'k', k)
+      time.sleep(rand.randint(7, 10))
+      ready_to_eat = False
 
-        # print(index, arr[index], props)
+      if not arr[node_comm.rank - 1][3]:
+        arr[node_comm.rank][3] = 1
+        arr[node_comm.rank][2] = 1
 
-        kind =  'Ambicioso' if props[2] else 'Amigable'
-        left = 'x' if props[0] else '-'
-        right = 'x' if props[1] else '-'
-        none = 'x' if not props[0] and not props[1] else '-'
+        if arr[node_comm.rank + 1][2]:
+          if arr[node_comm.rank][0]:
+            while arr[node_comm.rank + 1][2]: time.sleep(1)
+            ready_to_eat = True
+          else:
+            time.sleep(rand.randint(5, 15))
+            ready_to_eat = not arr[node_comm.rank + 1][2]
+        else:
+          ready_to_eat = True
 
-        print('Filosofo', index, kind, left, right, none)
-        # print arr[:nodes_size]
-    # else:
-    #   print arr[:nodes_size]
+      if ready_to_eat:
+        arr[node_comm.rank + 1][2] = 1
+        arr[node_comm.rank][3] = 1
+
+        time.sleep(rand.randint(2, 5))
+        
+        print('TEST -->', node_comm.rank, len(arr[node_comm.rank]))
+        arr[node_comm.rank + 1][2] = 0
+        arr[node_comm.rank][3] = 0
+      else:
+        print('TEST -->', node_comm.rank, len(arr[node_comm.rank]))
+        arr[node_comm.rank][3] = 0
+        arr[node_comm.rank + 1][2] = 0
+
+      time.sleep(rand.randint(7, 10))
+
+    arr[node_comm.rank][4] = 1
+
+  # world_comm.Barrier()
+  print('FINISH', node_comm.rank, arr)
+
+  # for index in range(0, nodes_size):
+
+  #   props = [int(x) for x in bin(arr[index])[2:]]
+  #   while len(props) < 3: props.insert(0, 0)
+
+  #   # print(index, arr[index], props)
+
+  #   kind =  'Ambicioso' if props[2] else 'Amigable'
+  #   left = 'x' if props[0] else '-'
+  #   right = 'x' if props[1] else '-'
+  #   none = 'x' if not props[0] and not props[1] else '-'
+
+  #   print('Filosofo', index, kind, left, right, none)
+
 
   # teams_list = ['Filosofo 1', 'Filosofo 2', 'Filosofo 3']
   # data = np.array([[1, 2, 1],

@@ -1,16 +1,9 @@
 #!/usr/bin/python
 
 import sys
-import json
+import time
+import numpy as np
 from mpi4py import MPI
-
-def get_number(number, first_one_thousand_primes):
-  for prime in first_one_thousand_primes:
-    if number % prime == 0:
-      number += 1
-    else:
-      break
-  return number
 
 def is_prime(number):
   # Return true if a number is prime
@@ -25,57 +18,57 @@ def is_prime(number):
 
 def main():
   root_process = 0
+  max = 0
   primes_cont = 0
-  nodes_count = 0
-  first_iteration = True
-  digits = []
-  data = []
 
-  comm = MPI.COMM_WORLD
-  rank = comm.Get_rank()
+  disp_unit = MPI.INT.Get_size()
+  world_comm = MPI.COMM_WORLD
+  node_comm = world_comm.Split_type(MPI.COMM_TYPE_SHARED)
+  size = world_comm.Get_size()
+
+  rank = node_comm.rank
 
   if rank == root_process:
     start_time = MPI.Wtime()
-    size = comm.Get_size()
-
-    with open('primes.json') as json_file:  
-      first_one_thousand_primes = json.load(json_file)
 
     n = int(sys.argv[1:][0])
     min = 10**(n - 1)
     max = 10**n
-    number = min + 1
+
+    memory_size = disp_unit
+  else:
+    memory_size = 0
+
+  max = world_comm.bcast(max, root=root_process)
+
+  # arr = np.ndarray(dtype='i', shape=(1,))
+  # win = MPI.Win.Create(arr, 1, comm=comm)
   
-  while True:  
-    if rank == root_process:
-      if first_iteration:
-        for node_rank in range(1, size):
-          number = get_number(number, first_one_thousand_primes)
-          comm.send(number, dest=node_rank)
-          number += 1
-        first_iteration = False
+  win = MPI.Win.Allocate_shared(memory_size, disp_unit, comm=node_comm)
+  buf, itemsize = win.Shared_query(0)
 
-      (node_rank, node_data) = comm.recv(source=MPI.ANY_SOURCE)
-      # print('node_rank', node_rank, 'node_data', node_data)
-      primes_cont += int(node_data)
-
-      number = get_number(number, first_one_thousand_primes)
-      if number <= max:
-        comm.send(number, dest=node_rank)
-        number += 1
-      else:
-        comm.send(-1, dest=node_rank)
-        nodes_count += 1
-
-      if nodes_count == size - 1: break
-    else:
-      number = comm.recv(source=root_process)
-      # print('number', number)
-      if number == -1: break
-      comm.send((rank, is_prime(number)), dest=root_process)
+  buf = np.array(buf, dtype='B', copy=False)
+  arr = np.ndarray(buffer=buf, dtype='i', shape=(1,1))
 
   if rank == root_process:
-    print 'El numero de primos de', n, 'digitos es', primes_cont, 'Tiempo:', MPI.Wtime() - start_time
+    win.Fence()
+    arr[0,0] = [min]
+
+  world_comm.barrier()
+
+  while True:
+    win.Fence()
+    number = arr[0,0]
+    arr[0,0] += 1
+    win.Fence()
+    if number >= max: break
+    print('RANK:', rank, 'NUMBER:', number)
+    if is_prime(number): primes_cont += 1
+
+  result = world_comm.reduce(sendobj=primes_cont, root=root_process, op=MPI.SUM)
+
+  if rank == root_process:
+    print 'El numero de primos de', n, 'digitos es', result, 'Tiempo:', MPI.Wtime() - start_time
 
 if __name__ == '__main__':
   main()

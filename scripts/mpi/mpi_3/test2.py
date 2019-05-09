@@ -1,4 +1,5 @@
 import numpy as np
+import random as rand
 from mpi4py import MPI
 
 world_comm = MPI.COMM_WORLD

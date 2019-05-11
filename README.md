@@ -24,3 +24,8 @@
 ```
   mpicc primes.v2.c -o primes -lm
 ```
+
+## Description
+
+* k-primes: Primes quantity from 0 to k
+* primes-challenge: Primes quantity for n digits

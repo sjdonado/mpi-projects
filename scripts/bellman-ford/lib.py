@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 def print_by_node(pred, origin, dest, path):
   if dest == origin:
     return path
@@ -6,7 +8,7 @@ def print_by_node(pred, origin, dest, path):
     return print_by_node(pred, origin, next_node, "%s ,%d" % (path, next_node + 1))
 
 def read_graph():
-  entry = open('grafo.txt', 'r')
+  entry = open('grafo-test.txt', 'r')
 
   graph = []
   for index, line in enumerate(entry.readlines()):
@@ -15,8 +17,10 @@ def read_graph():
       # weight_matrix = np.zeros(shape=(n, n), dtype='i')
     else:
       a, b, w = line.rstrip().split(' ')
-      x_idx = int(a[1:]) - 1
-      y_idx = int(b[1:]) - 1
+      if 'a' in a.lower(): a = a[1:]
+      if 'b' in b.lower(): b = b[1:]
+      x_idx = int(a) - 1
+      y_idx = int(b) - 1
       graph.append([x_idx, y_idx, int(w)])
       graph.append([y_idx, x_idx, int(w)])
 
@@ -25,7 +29,7 @@ def read_graph():
 def bellman_ford(graph, n, origin):
   # Step 1: Initialize distances from src to all other vertices 
   # as INFINITE 
-  dist = [float("Inf")] * n
+  dist = [float('Inf')] * n
   pred = [None] * n
   dist[origin] = 0 
 
@@ -37,7 +41,7 @@ def bellman_ford(graph, n, origin):
     # the picked vertex. Consider only those vertices which are still in 
     # queue 
     for a, b, w in graph: 
-      if dist[a] != float("Inf") and dist[a] + w < dist[b]: 
+      if dist[a] != float('Inf') and dist[a] + w < dist[b]: 
         dist[b] = dist[a] + w 
         pred[b] = a
 
@@ -47,13 +51,14 @@ def bellman_ford(graph, n, origin):
   # is a cycle. 
 
   for a, b, w in graph: 
-    if dist[a] != float("Inf") and dist[a] + w < dist[b]: 
-      print "Graph contains negative weight cycle"
+    if dist[a] != float('Inf') and dist[a] + w < dist[b]: 
+      print 'Graph contains negative weight cycle'
       break
 
   return dist, pred
 
-def write_vertex(file, pred, n, origin):
-  file.write("V%d:\n" % (origin + 1))
+def write_vertex(pred, n, origin):
+  print("V%d:" % (origin + 1))
   for node in range(n):
-    file.write("%d: %s\n" % (node + 1, print_by_node(pred, origin, node, "%d" % (node + 1))[::-1]))
+    print("%d: %s" % (node + 1, print_by_node(pred, origin, node, "%d" % (node + 1))[::-1]))
+  print("\n")

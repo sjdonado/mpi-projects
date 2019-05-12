@@ -41,6 +41,8 @@ def main():
   table = np.ndarray(buffer=buf, dtype='i', shape=(size, attr_size))
 
   if rank == root_process:
+    start_time = MPI.Wtime()
+
     if len(sys.argv[1:]) == 1:
       k = int(sys.argv[1:][0])
     else:
@@ -88,6 +90,7 @@ def main():
       if all(node[5] for node in table): break
       print_table(table, size)
       time.sleep(1)
+    print("Tiempo de ejecucion: %f" % (MPI.Wtime() - start_time))
   else:
     rank_pos = rank - 1
 

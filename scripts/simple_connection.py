@@ -10,7 +10,7 @@ def main():
 
   if rank == root_process:
     size = comm.Get_size()
-    ranks_range = range(0, size)
+    ranks_range = range(size)
   else:
     ranks_range = None
 

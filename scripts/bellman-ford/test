@@ -1,0 +1,25 @@
+echo 'Processing...'
+date=`date '+%Y-%m-%d %H:%M:%S'`
+title="RESULTADOS DEL ALGORITMO secuencial.py"
+margin=$(seq -s= ${#title}|tr -d '[:digit:]')
+
+echo $date > results.txt
+echo $margin >> results.txt
+echo $title >> results.txt
+echo $margin >> results.txt
+
+python secuencial.py $1 >> results.txt
+echo $margin >> results.txt
+
+title="RESULTADOS DEL ALGORITMO paralela.py"
+echo $title >> results.txt
+echo $margin >> results.txt
+
+for cores in {2..10}
+do
+  echo "n= $cores"
+  echo $margin >> results.txt
+  echo 'n=' $cores >> results.txt
+  echo $margin >> results.txt
+  mpiexec -n $cores python paralela.py >> results.txt
+done

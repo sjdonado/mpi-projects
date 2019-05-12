@@ -19,7 +19,7 @@ def main():
     # print('pred', pred)
     utils.write_vertex(results, pred, n, origin)
 
-  print 'Tiempo de ejecucion:', time.time() - start_time
+  print("Tiempo de ejecucion: %f" % (time.time() - start_time))
 
 if __name__ == '__main__':
   main()

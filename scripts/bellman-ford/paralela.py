@@ -20,7 +20,7 @@ def main():
   if rank == root_process:
     start_time = MPI.Wtime()
     n, graph = utils.read_graph()
-    memory_size = disp_unit**n
+    memory_size = disp_unit
 
     open('paralela.txt', 'w').close()
   else:
@@ -30,22 +30,28 @@ def main():
   
   win = MPI.Win.Allocate_shared(memory_size, disp_unit, comm=node_comm)
 
-  win.Fence()
   if rank == root_process:
-    win.Put(np.zeros(shape=(n,), dtype='i'), root_process)
-  win.Fence()
+    win.Put(np.zeros(shape=(1,), dtype='i'), 0)
 
   results = open('paralela.txt', 'a')
+  array = np.empty(shape=(1,), dtype='i')
+
+  world_comm.barrier()
 
   while True:
-    win.Fence()
-    array = np.empty(shape=(n,), dtype='i')
-    win.Get(array, root_process)
-    vertex = np.argmin(array)
-    if array[vertex] == 1: break
-    array[vertex] = 1
-    win.Put(array, root_process)
-    win.Fence()
+    # print('HERE -->', rank)
+
+    win.Lock(MPI.LOCK_EXCLUSIVE, 1)
+
+    win.Get(array, 0)
+    vertex = array[0]
+    array[0] += 1
+    win.Put(array, 0)
+
+    win.Unlock(1)
+
+    # print('RANK -->', rank, 'vertex: ', vertex, 'exit', vertex >= n)
+    if vertex >= n: break
 
     dist, pred = utils.bellman_ford(graph, n, vertex)
     utils.write_vertex(results, pred, n, vertex)
@@ -53,7 +59,7 @@ def main():
   world_comm.barrier()
 
   if rank == root_process:
-    print 'Tiempo de ejecucion:', MPI.Wtime() - start_time
+    print("Tiempo de ejecucion: %f" % (MPI.Wtime() - start_time))
 
 if __name__ == '__main__':
   main()

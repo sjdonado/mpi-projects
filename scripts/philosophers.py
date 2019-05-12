@@ -6,123 +6,149 @@ import random as rand
 import numpy as np
 from mpi4py import MPI
 
+def print_table(table, size):
+  header = "\t"
+  fork = "\t"
+  avaliable_fork = "\t"
+  for idx in range(size):
+    header += "Filosofo %d (%s) \t\t" % (idx + 1, 'Ambicioso' if table[idx, 0] else 'Amigable')
+    fork += "\t%s | %s \t\t\t" % ('x' if table[idx, 3] else '-', 'x' if table[idx, 4] else '-')
+    avaliable_fork += "\t  %s\t\t\t" % ('x' if not table[idx, 3] and not table[idx, 4] else '-')
+
+  limiter = "=" * (len(header) + 27)
+  print(" |%s| \n |%s| \n |%s| \n |%s| \n |%s| \n |%s| \n |%s| \n" % (limiter, header, limiter, fork, limiter, avaliable_fork, limiter))
+
 def main():
   root_process = 0
   k = 0
-  attr_size = 5
+  attr_size = 6
 
-  world_comm = MPI.COMM_WORLD
-  size = world_comm.Get_size()
   disp_unit = MPI.INT.Get_size()
+  world_comm = MPI.COMM_WORLD
+  size = world_comm.Get_size() - 1
+  rank = world_comm.Get_rank()
 
-  node_comm = world_comm.Split_type(MPI.COMM_TYPE_SHARED)
-
-  if node_comm.rank == root_process:
+  if rank == root_process:
     start_time = MPI.Wtime()
     memory_size = size * disp_unit**attr_size
   else:
     memory_size = 0
   
-  win = MPI.Win.Allocate_shared(memory_size, disp_unit, comm=node_comm)
-  buf, itemsize = win.Shared_query(0)
+  win = MPI.Win.Allocate_shared(memory_size, disp_unit, comm=world_comm.Split_type(MPI.COMM_TYPE_SHARED))
 
-  buf = np.array(buf, dtype='B', copy=False)
-  arr = np.ndarray(buffer=buf, dtype='i', shape=(size, attr_size))
+  if rank == root_process:
+    init_table = np.zeros(dtype='i', shape=(size, attr_size))
 
-  if node_comm.rank == root_process:
     if len(sys.argv[1:]) == 1:
       k = int(sys.argv[1:][0])
     else:
       print('Error! k not supplied')
 
-    if node_comm.size > 2:
-      for node in range(1, node_comm.size):
+    if size > 2:
+      for node in range(size):
         right_node = node + 1
+        left_node = node - 1
         left_fork = 0
         right_fork = 0
-        if node == node_comm.size - 1: right_node = 1
+
+        if node == size - 1: right_node = 0
+        if left_node < 0: left_node = size - 1
+
         if node == 0:
           left_fork = rand.randint(0, 1)
           right_fork = rand.randint(0, 1)
 
-        # If my left partner doesn't have the fork I can get it
-        if node - 1 > 0 and not arr[node - 1][3]:
-          arr[node-1][3] = rand.randint(0, 1)
-        # If my right partner doesn't have the fork I can get it
-        if len(arr) > right_node and len(arr[right_node]) > 0 and not arr[right_node][2]:
-          arr[right_node][2] = rand.randint(0, 1)
+        # If my left partner doesn't have the right fork I can get it
+        if not init_table[left_node, 4]:
+          init_table[node, 3] = rand.randint(0, 1)
+        # If my right partner doesn't have the left fork I can get it
+        if not init_table[right_node, 3]:
+          init_table[node, 4] = rand.randint(0, 1)
 
-        # [kind, right_node, left_fork, right_fork, finished]
+        # [kind, left_node, right_node, left_fork, right_fork, finished]
         # kind -> 0: Friendly, 1: Ambitious
-        arr[node] = np.array([0, right_node, left_fork, right_fork, 0], dtype='i')
+        init_table[node] = np.array([0, left_node, right_node, left_fork, right_fork, 0], dtype='i')
     
-      ambitious = np.random.choice(node_comm.size, 2)
+      ambitious = np.random.choice(size, 2)
       # print(arr)
-      arr[ambitious[0]][0] = 1
-      arr[ambitious[1]][0] = 1
+      init_table[ambitious[0], 0] = 1
+      init_table[ambitious[1], 0] = 1
+
+      win.Put(init_table, 0)
+    else:
+      print('Error! Min 3 philosophers')
+      exit(1)
 
   k = world_comm.bcast(k, root=root_process)
+  table = np.zeros(shape=(size, attr_size), dtype='i')
 
-  if node_comm.rank == root_process:
-    while all(not node[4] for node in arr):
+  if rank == root_process:
+    while True:
+      win.Get(table, 0)
+      # print('TABLE ->', table, 'BREAK -->', all(node[5] for node in table))
+      if all(node[5] for node in table): break
+      print_table(table, size)
       time.sleep(1)
-      print(arr)
   else:
-    for task in range(0, k):
-      print('NODE', node_comm.rank, 'TASK', task, '-->', 'arr', arr[node_comm.rank], 'k', k)
+    rank_pos = rank - 1
+
+    for task in range(k):
+      win.Get(table, 0)
+
       time.sleep(rand.randint(7, 10))
       ready_to_eat = False
 
-      if not arr[node_comm.rank - 1][3]:
-        arr[node_comm.rank][3] = 1
-        arr[node_comm.rank][2] = 1
+      # print('LEFT_FORK -->, rank_pos', rank_pos, 'table', table[rank_pos], 'left_table', table[table[rank_pos, 1]])
+      if not table[table[rank_pos, 1], 4]:
+        win.Lock(MPI.LOCK_EXCLUSIVE, 1)
 
-        if arr[node_comm.rank + 1][2]:
-          if arr[node_comm.rank][0]:
-            while arr[node_comm.rank + 1][2]: time.sleep(1)
+        win.Get(table, 0)
+        table[rank_pos, 3] = 1
+        win.Put(table, 0)
+
+        win.Unlock(1)
+
+        # print('RIGHT_FORK -->, rank_pos', rank_pos, 'table', table[rank_pos], 'left_table', table[table[rank_pos, 2]])
+        if table[table[rank_pos, 2], 3]:
+          if table[rank_pos, 0]:
+            while table[table[rank_pos, 2], 3]: win.Get(table, 0)
             ready_to_eat = True
           else:
             time.sleep(rand.randint(5, 15))
-            ready_to_eat = not arr[node_comm.rank + 1][2]
+            win.Get(table, 0)
+            ready_to_eat = not table[table[rank_pos, 2], 3]
         else:
           ready_to_eat = True
 
+      win.Lock(MPI.LOCK_EXCLUSIVE, 1)
+
       if ready_to_eat:
-        arr[node_comm.rank + 1][2] = 1
-        arr[node_comm.rank][3] = 1
+        win.Get(table, 0)
+        table[rank_pos, 4] = 1
+        win.Put(table, 0)
+
+        win.Unlock(1)
 
         time.sleep(rand.randint(2, 5))
-        
-        print('TEST -->', node_comm.rank, len(arr[node_comm.rank]))
-        arr[node_comm.rank + 1][2] = 0
-        arr[node_comm.rank][3] = 0
+
+        win.Lock(MPI.LOCK_EXCLUSIVE, 1)
+
+        win.Get(table, 0)
+        table[rank_pos, 4] = 0
+        table[rank_pos, 3] = 0
+        win.Put(table, 0)
+
       else:
-        print('TEST -->', node_comm.rank, len(arr[node_comm.rank]))
-        arr[node_comm.rank][3] = 0
-        arr[node_comm.rank + 1][2] = 0
+        win.Get(table, 0)
+        table[rank_pos, 4] = 0
+        table[rank_pos, 3] = 0
+        win.Put(table, 0)
+
+      win.Unlock(1)
 
       time.sleep(rand.randint(7, 10))
 
-    arr[node_comm.rank][4] = 1
-
-  # world_comm.Barrier()
-  print('FINISH', node_comm.rank, arr)
-
-  # for index in range(0, nodes_size):
-
-  #   props = [int(x) for x in bin(arr[index])[2:]]
-  #   while len(props) < 3: props.insert(0, 0)
-
-  #   # print(index, arr[index], props)
-
-  #   kind =  'Ambicioso' if props[2] else 'Amigable'
-  #   left = 'x' if props[0] else '-'
-  #   right = 'x' if props[1] else '-'
-  #   none = 'x' if not props[0] and not props[1] else '-'
-
-  #   print('Filosofo', index, kind, left, right, none)
-
-  # print("%d \t\t %d" % (i, dist[i]))
+    table[rank_pos, 5] = 1
 
 if __name__ == '__main__':
   main()

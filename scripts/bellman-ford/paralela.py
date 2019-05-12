@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import secuencial as utils
+import lib as utils
 import numpy as np
 from mpi4py import MPI
 

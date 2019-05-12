@@ -122,17 +122,7 @@ def main():
 
   #   print('Filosofo', index, kind, left, right, none)
 
-
-  # teams_list = ['Filosofo 1', 'Filosofo 2', 'Filosofo 3']
-  # data = np.array([[1, 2, 1],
-  #                 [0, 1, 0],
-  #                 [2, 4, 2]])
-
-  # row_format ="{:>15}" * (len(teams_list) + 1)
-  # print row_format.format("", *teams_list)
-  # for team, row in zip(teams_list, data):
-  #     print row_format.format(team, *row)
-  # print 'Tiempo de ejecucion:', MPI.Wtime() - start_time
+  # print("%d \t\t %d" % (i, dist[i]))
 
 if __name__ == '__main__':
   main()

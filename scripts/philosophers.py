@@ -35,10 +35,12 @@ def main():
     memory_size = 0
   
   win = MPI.Win.Allocate_shared(memory_size, disp_unit, comm=world_comm.Split_type(MPI.COMM_TYPE_SHARED))
+  buf, itemsize = win.Shared_query(0)
+
+  buf = np.array(buf, dtype='B', copy=False)
+  table = np.ndarray(buffer=buf, dtype='i', shape=(size, attr_size))
 
   if rank == root_process:
-    init_table = np.zeros(dtype='i', shape=(size, attr_size))
-
     if len(sys.argv[1:]) == 1:
       k = int(sys.argv[1:][0])
     else:
@@ -59,32 +61,29 @@ def main():
           right_fork = rand.randint(0, 1)
 
         # If my left partner doesn't have the right fork I can get it
-        if not init_table[left_node, 4]:
-          init_table[node, 3] = rand.randint(0, 1)
+        if not table[left_node, 4]:
+          table[node, 3] = rand.randint(0, 1)
         # If my right partner doesn't have the left fork I can get it
-        if not init_table[right_node, 3]:
-          init_table[node, 4] = rand.randint(0, 1)
+        if not table[right_node, 3]:
+          table[node, 4] = rand.randint(0, 1)
 
         # [kind, left_node, right_node, left_fork, right_fork, finished]
         # kind -> 0: Friendly, 1: Ambitious
-        init_table[node] = np.array([0, left_node, right_node, left_fork, right_fork, 0], dtype='i')
+        table[node] = np.array([0, left_node, right_node, left_fork, right_fork, 0], dtype='i')
     
       ambitious = np.random.choice(size, 2)
       # print(arr)
-      init_table[ambitious[0], 0] = 1
-      init_table[ambitious[1], 0] = 1
+      table[ambitious[0], 0] = 1
+      table[ambitious[1], 0] = 1
 
-      win.Put(init_table, 0)
     else:
       print('Error! Min 3 philosophers')
       exit(1)
 
   k = world_comm.bcast(k, root=root_process)
-  table = np.zeros(shape=(size, attr_size), dtype='i')
 
   if rank == root_process:
     while True:
-      win.Get(table, 0)
       # print('TABLE ->', table, 'BREAK -->', all(node[5] for node in table))
       if all(node[5] for node in table): break
       print_table(table, size)
@@ -93,58 +92,43 @@ def main():
     rank_pos = rank - 1
 
     for task in range(k):
-      win.Get(table, 0)
-
       time.sleep(rand.randint(7, 10))
       ready_to_eat = False
 
       # print('LEFT_FORK -->, rank_pos', rank_pos, 'table', table[rank_pos], 'left_table', table[table[rank_pos, 1]])
       if not table[table[rank_pos, 1], 4]:
         win.Lock(MPI.LOCK_EXCLUSIVE, 1)
-
-        win.Get(table, 0)
         table[rank_pos, 3] = 1
-        win.Put(table, 0)
-
         win.Unlock(1)
 
         # print('RIGHT_FORK -->, rank_pos', rank_pos, 'table', table[rank_pos], 'left_table', table[table[rank_pos, 2]])
         if table[table[rank_pos, 2], 3]:
           if table[rank_pos, 0]:
-            while table[table[rank_pos, 2], 3]: win.Get(table, 0)
+            while table[table[rank_pos, 2], 3]: time.sleep(0.01)
             ready_to_eat = True
           else:
             time.sleep(rand.randint(5, 15))
-            win.Get(table, 0)
             ready_to_eat = not table[table[rank_pos, 2], 3]
         else:
           ready_to_eat = True
 
-      win.Lock(MPI.LOCK_EXCLUSIVE, 1)
-
       if ready_to_eat:
-        win.Get(table, 0)
+        win.Lock(MPI.LOCK_EXCLUSIVE, 1)
         table[rank_pos, 4] = 1
-        win.Put(table, 0)
-
         win.Unlock(1)
 
         time.sleep(rand.randint(2, 5))
 
         win.Lock(MPI.LOCK_EXCLUSIVE, 1)
-
-        win.Get(table, 0)
         table[rank_pos, 4] = 0
         table[rank_pos, 3] = 0
-        win.Put(table, 0)
+        win.Unlock(1)
 
       else:
-        win.Get(table, 0)
+        win.Lock(MPI.LOCK_EXCLUSIVE, 1)
         table[rank_pos, 4] = 0
         table[rank_pos, 3] = 0
-        win.Put(table, 0)
-
-      win.Unlock(1)
+        win.Unlock(1)
 
       time.sleep(rand.randint(7, 10))
 

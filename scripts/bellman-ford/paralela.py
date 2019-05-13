@@ -8,6 +8,7 @@ def main():
   root_process = 0
   n = 0
   graph = []
+  results = []
 
   disp_unit = MPI.INT.Get_size()
 
@@ -24,17 +25,15 @@ def main():
   else:
     memory_size = 0
 
-  (n, graph) = world_comm.bcast((n,graph), root=root_process)
-  
   win = MPI.Win.Allocate_shared(memory_size, disp_unit, comm=node_comm)
 
   if rank == root_process:
     win.Put(np.zeros(shape=(1,), dtype='i'), 0)
 
   array = np.empty(shape=(1,), dtype='i')
-  world_comm.barrier()
 
-  results = []
+  (n, graph) = world_comm.bcast((n,graph), root=root_process)
+
   while True:
     win.Lock(MPI.LOCK_EXCLUSIVE, 1)
 
@@ -55,7 +54,7 @@ def main():
   if rank == root_process:
     for arr_results in data:
       for (pred, vertex) in arr_results:
-        utils.write_vertex(pred, n, vertex)
+        utils.write_vertex(n, pred, vertex)
     print("Tiempo de ejecucion: %f" % (MPI.Wtime() - start_time))
 
 if __name__ == '__main__':

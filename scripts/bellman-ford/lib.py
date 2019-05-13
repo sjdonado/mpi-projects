@@ -8,7 +8,7 @@ def print_by_node(pred, origin, dest, path):
     return print_by_node(pred, origin, next_node, "%s ,%d" % (path, next_node + 1))
 
 def read_graph():
-  entry = open('grafo-test.txt', 'r')
+  entry = open('grafo.txt', 'r')
 
   graph = []
   for index, line in enumerate(entry.readlines()):
@@ -52,13 +52,14 @@ def bellman_ford(graph, n, origin):
 
   for a, b, w in graph: 
     if dist[a] != float('Inf') and dist[a] + w < dist[b]: 
-      print 'Graph contains negative weight cycle'
-      break
+      print('Graph contains negative weight cycle')
+      return None, None
 
   return dist, pred
 
-def write_vertex(pred, n, origin):
-  print("V%d:" % (origin + 1))
-  for node in range(n):
-    print("%d: %s" % (node + 1, print_by_node(pred, origin, node, "%d" % (node + 1))[::-1]))
-  print("\n")
+def write_vertex(n, pred, origin):
+  if pred is not None and origin is not None:
+    print("V%d:" % (origin + 1))
+    for node in range(n):
+      print("%d: %s" % (node + 1, print_by_node(pred, origin, node, "%d" % (node + 1))[::-1]))
+    print("\n")

@@ -17,7 +17,7 @@ def main():
     dist, pred = utils.bellman_ford(graph, n, origin)
     # print('dist', dist)
     # print('pred', pred)
-    utils.write_vertex(pred, n, origin)
+    utils.write_vertex(n, pred, origin)
 
   print("Tiempo de ejecucion: %f" % (time.time() - start_time))
 

@@ -15,7 +15,7 @@ def print_table(table, size):
     fork += "\t%s | %s \t\t\t" % ('x' if table[idx, 3] else '-', 'x' if table[idx, 4] else '-')
     avaliable_fork += "\t  %s\t\t\t" % ('x' if not table[idx, 3] and not table[idx, 4] else '-')
 
-  limiter = "=" * (len(header) + 27)
+  limiter = "=" * (len(header) + size * 8 + (4 if size == 3 else 3))
   print(" |%s| \n |%s| \n |%s| \n |%s| \n |%s| \n |%s| \n |%s| \n" % (limiter, header, limiter, fork, limiter, avaliable_fork, limiter))
 
 def main():
@@ -47,6 +47,7 @@ def main():
       k = int(sys.argv[1:][0])
     else:
       print('Error! k not supplied')
+      exit(1)
 
     if size > 2:
       for node in range(size):
@@ -90,7 +91,7 @@ def main():
       if all(node[5] for node in table): break
       print_table(table, size)
       time.sleep(1)
-    print("Tiempo de ejecucion: %f" % (MPI.Wtime() - start_time))
+    print("Execution time: %f" % (MPI.Wtime() - start_time))
   else:
     rank_pos = rank - 1
 

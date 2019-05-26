@@ -50,7 +50,7 @@ def bellman_ford(graph, n, origin):
   # negative weight cycle. If we get a shorter path, then there 
   # is a cycle. 
 
-  for a, b, w in graph: 
+  for a, b, w in graph:
     if dist[a] != float('Inf') and dist[a] + w < dist[b]: 
       print('Graph contains negative weight cycle')
       return None, None
